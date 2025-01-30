@@ -1,0 +1,27 @@
+==3396== NVPROF is profiling process 3396, command: ./cudaKmeans
+==3396== Profiling application: ./cudaKmeans
+==3396== Warning: 22 API trace records have same start and end timestamps.
+This can happen because of short execution duration of CUDA APIs and low timer resolution on the underlying operating system.
+==3396== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   62.75%  5.31082s     11200  474.18us  13.631us  8.3707ms  kmeans_kernel(float*, int*, float*, int, int)
+                   36.61%  3.09816s     11200  276.62us  19.359us  3.1642ms  update_centroids(float*, int*, float*, int*, int, int)
+                    0.23%  19.168ms     22520     851ns     447ns  241.40us  [CUDA memcpy DtoH]
+                    0.22%  18.324ms     22400     818ns     447ns  20.671us  [CUDA memset]
+                    0.20%  17.107ms     11440  1.4950us     255ns  1.0651ms  [CUDA memcpy HtoD]
+      API calls:   81.89%  9.87188s     22400  440.71us  34.600us  9.2018ms  cudaDeviceSynchronize
+                   13.48%  1.62456s     33960  47.837us  13.400us  2.4270ms  cudaMemcpy
+                    1.98%  238.35ms     22400  10.640us  4.1000us  2.0871ms  cudaLaunchKernel
+                    1.22%  147.44ms       480  307.17us  1.9000us  103.08ms  cudaMalloc
+                    0.87%  104.40ms     22400  4.6600us  1.1000us  436.80us  cudaMemset
+                    0.31%  37.690ms       480  78.520us  2.2000us  813.00us  cudaFree
+                    0.23%  27.390ms         1  27.390ms  27.390ms  27.390ms  cuDevicePrimaryCtxRelease
+                    0.01%  1.2844ms       115  11.168us       0ns  599.60us  cuDeviceGetAttribute
+                    0.01%  801.40us         1  801.40us  801.40us  801.40us  cuLibraryUnload
+                    0.00%  402.20us         1  402.20us  402.20us  402.20us  cuDeviceTotalMem
+                    0.00%  318.80us         1  318.80us  318.80us  318.80us  cuModuleGetLoadingMode
+                    0.00%  5.1000us         4  1.2750us     100ns  3.6000us  cuDeviceGetCount
+                    0.00%  1.2000us         1  1.2000us  1.2000us  1.2000us  cuDeviceGetName
+                    0.00%     500ns         2     250ns     200ns     300ns  cuDeviceGet
+                    0.00%     500ns         1     500ns     500ns     500ns  cuDeviceGetLuid
+                    0.00%     200ns         1     200ns     200ns     200ns  cuDeviceGetUuid
