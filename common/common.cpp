@@ -1,6 +1,10 @@
 #include "common.h"
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 
-void KMeansHelper::init_centroids(int k, const std::vector<Point>& points, std::vector<Point>& centroids) {
+void KMeansHelper::init_centroids(const int k, const std::vector<Point>& points, std::vector<Point>& centroids) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, points.size() - 1);
@@ -10,11 +14,11 @@ void KMeansHelper::init_centroids(int k, const std::vector<Point>& points, std::
     }
 }
 
-void KMeansHelper::draw_chart_gnu(std::vector<Point>& points, const std::string& filename, double minX, double minY, double maxX, double maxY, int numClusters) {
+void KMeansHelper::draw_chart_gnu(const std::vector<Point>& points, const std::string& filename, const float minX, const float minY, const float maxX, const float maxY, const int numClusters) {
     std::ofstream outfile("data.txt");
     std::filesystem::create_directory("plots");
 
-    for (auto point : points) {
+    for (const auto point : points) {
         outfile << point.x * (maxX - minX) + minX << " " << point.y * (maxY - minY) + minY << " " << point.cluster << std::endl;
     }
 
@@ -24,7 +28,7 @@ void KMeansHelper::draw_chart_gnu(std::vector<Point>& points, const std::string&
     remove("data.txt");
 }
 
-std::vector<Point> KMeansHelper::readAndNormalizeCSV(const std::string& filename, double& minX, double& minY, double& maxX, double& maxY) {
+std::vector<Point> KMeansHelper::readAndNormalizeCSV(const std::string& filename, float& minX, float& minY, float& maxX, float& maxY) {
     std::cout << "Reading CSV file..." << std::endl;
     std::vector<Point> points;
     std::string line;
@@ -35,18 +39,18 @@ std::vector<Point> KMeansHelper::readAndNormalizeCSV(const std::string& filename
     while (std::getline(file, line)) {
         std::stringstream lineStream(line);
         std::string bit;
-        double x, y;
+        float x, y;
         std::getline(lineStream, bit, ',');
-        x = std::stod(bit);
+        x = std::stof(bit);
         std::getline(lineStream, bit, ',');
         y = std::stof(bit);
         points.emplace_back(x, y);
     }
 
-    minX = std::min_element(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.x < b.x; })->x;
-    maxX = std::max_element(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.x < b.x; })->x;
-    minY = std::min_element(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
-    maxY = std::max_element(points.begin(), points.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
+    minX = std::ranges::min_element(points, [](const Point& a, const Point& b) { return a.x < b.x; })->x;
+    maxX = std::ranges::max_element(points, [](const Point& a, const Point& b) { return a.x < b.x; })->x;
+    minY = std::ranges::min_element(points, [](const Point& a, const Point& b) { return a.y < b.y; })->y;
+    maxY = std::ranges::max_element(points, [](const Point& a, const Point& b) { return a.y < b.y; })->y;
 
     for (auto& point : points) {
         point.x = (point.x - minX) / (maxX - minX);
@@ -69,33 +73,32 @@ void KMeansHelper::logExecutionDetails(const std::string& filename, const std::v
     out.close();
 }
 
-void KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Point>& centroids, int k, int epochs) {
+void KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Point>& centroids, const int k, const int epochs) {
     for (int epoch = 0; epoch < epochs; ++epoch) {
         std::vector<float> sumX(k, 0.0f), sumY(k, 0.0f);
         std::vector<int> nPoints(k, 0);
         // Assign points to clusters
         for (auto& point : points) {
             for (int i = 0; i < k; ++i) {
-                double dist = point.distance(centroids[i]);
-                if (dist < point.minDist) {
+                if (const float dist = point.distance(centroids[i]); dist < point.minDist) {
                     point.minDist = dist;
                     point.cluster = i;
                 }
             }
             //append data to centroids
-            int clusterId = point.cluster;
+            const int clusterId = point.cluster;
             nPoints[clusterId]++;
             sumX[clusterId] += point.x;
             sumY[clusterId] += point.y;
             // reset distance
-            point.minDist = std::numeric_limits<double>::max();
+            point.minDist = std::numeric_limits<float>::max();
         }
 
         // Update centroids
         for (int i = 0; i < k; ++i) {
             if (nPoints[i] > 0) {
-                double newX = sumX[i] / nPoints[i];
-                double newY = sumY[i] / nPoints[i];
+                const float newX = sumX[i] / nPoints[i];
+                const float newY = sumY[i] / nPoints[i];
                 centroids[i].x = newX;
                 centroids[i].y = newY;
             }
