@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <omp.h>
 
 void KMeansHelper::init_centroids(const int k, const std::vector<Point>& points, std::vector<Point>& centroids) {
     std::random_device rd;
@@ -68,16 +69,21 @@ void KMeansHelper::logExecutionDetails(const std::string& filename, const std::v
             << std::get<1>(result) << ","
             << std::fixed << std::setprecision(4) << std::get<2>(result) << ","
             << std::fixed << std::setprecision(2) << std::get<3>(result) << ","
-            << std::fixed << std::setprecision(2) << std::get<4>(result) << "\n";
+            << std::fixed << std::setprecision(4) << std::get<4>(result) << "\n";
     }
     out.close();
 }
 
-void KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Point>& centroids, const int k, const int epochs) {
+std::vector<double> KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Point>& centroids, const int k, const int epochs) {
+    double clusterAssignTime = 0.0;
+    double centroidsUpdateTime = 0.0;
+
     for (int epoch = 0; epoch < epochs; ++epoch) {
         std::vector<float> sumX(k, 0.0f), sumY(k, 0.0f);
         std::vector<int> nPoints(k, 0);
+
         // Assign points to clusters
+        double startClusterAssign = omp_get_wtime();
         for (auto& point : points) {
             for (int i = 0; i < k; ++i) {
                 if (const float dist = point.distance(centroids[i]); dist < point.minDist) {
@@ -85,16 +91,17 @@ void KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Poi
                     point.cluster = i;
                 }
             }
-            //append data to centroids
             const int clusterId = point.cluster;
             nPoints[clusterId]++;
             sumX[clusterId] += point.x;
             sumY[clusterId] += point.y;
-            // reset distance
             point.minDist = std::numeric_limits<float>::max();
         }
+        double endClusterAssign = omp_get_wtime();
+        clusterAssignTime += (endClusterAssign - startClusterAssign);
 
         // Update centroids
+        double startCentroidsUpdate = omp_get_wtime();
         for (int i = 0; i < k; ++i) {
             if (nPoints[i] > 0) {
                 const float newX = sumX[i] / nPoints[i];
@@ -103,5 +110,9 @@ void KMeansHelper::kmeans_sequential(std::vector<Point>& points, std::vector<Poi
                 centroids[i].y = newY;
             }
         }
+        double endCentroidsUpdate = omp_get_wtime();
+        centroidsUpdateTime += (endCentroidsUpdate - startCentroidsUpdate);
     }
+
+    return {clusterAssignTime, centroidsUpdateTime};
 }
