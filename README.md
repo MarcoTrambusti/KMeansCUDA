@@ -1,8 +1,8 @@
 ![img.png](img.png)
 
 ## Reports
- [Report](https://github.com/MarcoTrambusti/KMeans/blob/main/reports/KMeans_Parallelization_Report.pdf)\
- [Slides](https://github.com/MarcoTrambusti/KMeans/blob/main/reports/PresentationKMeans.pdf)
+ [Report](https://github.com/MarcoTrambusti/KMeansCUDA/blob/main/reports/KMeans_Parallelization_Assignment__CUDA_.pdf)\
+ [Slides](https://github.com/MarcoTrambusti/KMeansCUDA/blob/main/reports/Presentazione%20CUDA.pdf)
 
 ## K-Means Parallelisation Assignment
 ### Introduction
@@ -23,7 +23,7 @@ Points in the dataset are represented using a Point structure that includes the 
 ### Sequential K-Means
 The sequential algorithm is divided into two main parts: assignment to clusters and updating of centroids. These steps are repeated for the specified number of iterations.
 ### Parallelization
-Parallelization was implemented using OpenMP. Parallelised steps include:
+Parallelization was implemented using CUDA. Parallelised steps include:
 - Cluster assignment: Calculation of the distance between points and centroids distributed over several threads.
 - Updating centroids: Parallel calculation of new centroid coordinates.
 
